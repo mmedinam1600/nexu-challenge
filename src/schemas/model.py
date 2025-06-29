@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
+from uuid import UUID
 
 
 class VehicleModelBaseSchema(BaseModel):
@@ -28,7 +29,7 @@ class VehicleModelUpdateSchema(BaseModel):
 
 
 class VehicleModelSchema(VehicleModelBaseSchema):
-    id: int
+    id: UUID
     is_active: bool
     created_at: datetime
     updated_at: datetime
