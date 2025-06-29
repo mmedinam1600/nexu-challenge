@@ -14,7 +14,7 @@ class VehicleModelModel(BaseModelMixin, Base):
 
     __tablename__ = "models"
     __table_args__ = (
-        UniqueConstraint("name", name="uq_vehicle_brand_name"),
+        UniqueConstraint("name", name="uq_vehicle_model_name"),
         {"schema": "vehicle"},
     )
 
