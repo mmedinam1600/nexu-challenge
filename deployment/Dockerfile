@@ -12,6 +12,7 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry install --no-root
 
 COPY ./src /app
+COPY ./.env /app/.env
 
 EXPOSE 8000
 
