@@ -1,5 +1,6 @@
 from typing import Dict, Any, Union, List
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert
 
 from models.model import VehicleModelModel
 from schemas.model import VehicleModelCreateMigrationSchema, VehicleModelUpdateSchema
@@ -63,3 +64,15 @@ class CRUDModel:
         db.commit()
         db.refresh(db_model)
         return db_model
+
+    def bulk_insert(
+        self, db: Session, *, models_data: list[VehicleModelCreateMigrationSchema]
+    ):
+        if not models_data:
+            return
+
+        models_dict = [model.model_dump() for model in models_data]
+        stmt = insert(self.model).values(models_dict)
+        stmt = stmt.on_conflict_do_nothing(index_elements=["name"])
+        db.execute(stmt)
+        db.commit()
