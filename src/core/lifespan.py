@@ -12,7 +12,7 @@ from crud.model import CRUDModel
 from models.brand import VehicleBrandModel
 from models.model import VehicleModelModel
 from schemas.brand import VehicleBrandCreateSchema
-from schemas.model import VehicleModelCreateSchema
+from schemas.model import VehicleModelCreateMigrationSchema
 
 
 def init_db() -> None:
@@ -98,7 +98,7 @@ def seed_db() -> None:
                 )
                 continue
             new_models.append(
-                VehicleModelCreateSchema(
+                VehicleModelCreateMigrationSchema(
                     brand_id=brand.id, name=model_name, average_price=average_price
                 )
             )

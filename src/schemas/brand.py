@@ -1,6 +1,6 @@
+from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
 
 
 class VehicleBrandBaseSchema(BaseModel):
@@ -18,8 +18,8 @@ class VehicleBrandCreateSchema(VehicleBrandBaseSchema):
 
 
 class VehicleBrandUpdateSchema(BaseModel):
-    name: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    is_active: bool | None = None
 
 
 class VehicleBrandSchema(VehicleBrandBaseSchema):
@@ -27,5 +27,13 @@ class VehicleBrandSchema(VehicleBrandBaseSchema):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class VehicleBrandWithAveragePriceSchema(BaseModel):
+    id: int
+    name: str
+    average_price: Decimal | None = None
 
     model_config = ConfigDict(from_attributes=True)

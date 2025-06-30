@@ -26,13 +26,6 @@ pre-commit = "^3.7.1"
 ruff = "^0.6.3"
 mypy = "^1.15.0"
 
-[tool.ruff]
-ignore = ["E501"]
-
-[tool.flake8]
-ignore = ['E501']
-max-line-length = 88
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

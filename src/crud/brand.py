@@ -1,9 +1,4 @@
-"""
-Este módulo contiene la clase de repositorio para las operaciones CRUD
-del modelo VehicleBrandModel.
-"""
-
-import typing as t
+from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert
 
@@ -32,19 +27,19 @@ class CRUDBrand:
         db.commit()
 
     @staticmethod
-    def get_all(db: Session) -> t.List[VehicleBrandModel]:
+    def get_all(db: Session) -> List[VehicleBrandModel]:
         """Obtiene todas las marcas de vehículos."""
         return db.query(VehicleBrandModel).all()
 
     @staticmethod
-    def get_by_id(db: Session, brand_id: int) -> t.Optional[VehicleBrandModel]:
+    def get_by_id(db: Session, brand_id: int) -> VehicleBrandModel | None:
         """Obtiene una marca de vehículo por su ID."""
         return (
             db.query(VehicleBrandModel).filter(VehicleBrandModel.id == brand_id).first()
         )
 
     @staticmethod
-    def get_by_name(db: Session, name: str) -> t.Optional[VehicleBrandModel]:
+    def get_by_name(db: Session, name: str) -> VehicleBrandModel | None:
         return (
             db.query(VehicleBrandModel).filter(VehicleBrandModel.name == name).first()
         )
@@ -70,13 +65,4 @@ class CRUDBrand:
         db.add(db_brand)
         db.commit()
         db.refresh(db_brand)
-        return db_brand
-
-    @staticmethod
-    def delete(db: Session, brand_id: int) -> t.Optional[VehicleBrandModel]:
-        """Elimina una marca de vehículo por su ID."""
-        db_brand = CRUDBrand.get_by_id(db, brand_id)
-        if db_brand:
-            db.delete(db_brand)
-            db.commit()
         return db_brand

@@ -1,14 +1,8 @@
-"""
-Este módulo contiene la clase de repositorio para las operaciones CRUD
-del modelo VehicleModelModel.
-"""
-
-import typing as t
+from typing import Dict, Any, Union, List
 from sqlalchemy.orm import Session
-from sqlalchemy.dialects.postgresql import insert
 
 from models.model import VehicleModelModel
-from schemas.model import VehicleModelCreateSchema, VehicleModelUpdateSchema
+from schemas.model import VehicleModelCreateMigrationSchema, VehicleModelUpdateSchema
 
 
 class CRUDModel:
@@ -19,9 +13,9 @@ class CRUDModel:
     def get_all_filtered(
         db: Session,
         *,
-        greater: t.Optional[float] = None,
-        lower: t.Optional[float] = None,
-    ) -> t.List[VehicleModelModel]:
+        greater: float | None = None,
+        lower: float | None = None,
+    ) -> List[VehicleModelModel]:
         query = db.query(VehicleModelModel)
         if greater is not None:
             query = query.filter(VehicleModelModel.average_price > greater)
@@ -30,19 +24,21 @@ class CRUDModel:
         return query.all()
 
     @staticmethod
-    def get_by_id(db: Session, model_id: int) -> t.Optional[VehicleModelModel]:
+    def get_by_id(db: Session, model_id: int) -> VehicleModelModel | None:
         return (
             db.query(VehicleModelModel).filter(VehicleModelModel.id == model_id).first()
         )
 
     @staticmethod
-    def get_by_name(db: Session, name: str) -> t.Optional[VehicleModelModel]:
+    def get_by_name(db: Session, name: str) -> VehicleModelModel | None:
         return (
             db.query(VehicleModelModel).filter(VehicleModelModel.name == name).first()
         )
 
     @staticmethod
-    def create(db: Session, model: VehicleModelCreateSchema) -> VehicleModelModel:
+    def create(
+        db: Session, model: VehicleModelCreateMigrationSchema
+    ) -> VehicleModelModel:
         db_model = VehicleModelModel(**model.model_dump())
         db.add(db_model)
         db.commit()
@@ -53,7 +49,7 @@ class CRUDModel:
     def update(
         db: Session,
         db_model: VehicleModelModel,
-        model_in: t.Union[VehicleModelUpdateSchema, t.Dict[str, t.Any]],
+        model_in: Union[VehicleModelUpdateSchema, Dict[str, Any]],
     ) -> VehicleModelModel:
         if isinstance(model_in, dict):
             update_data = model_in
@@ -67,24 +63,3 @@ class CRUDModel:
         db.commit()
         db.refresh(db_model)
         return db_model
-
-    @staticmethod
-    def delete(db: Session, model_id: int) -> t.Optional[VehicleModelModel]:
-        db_model = CRUDModel.get_by_id(db, model_id)
-        if db_model:
-            db.delete(db_model)
-            db.commit()
-        return db_model
-
-    def bulk_insert(self, db: Session, *, models_data: list[VehicleModelCreateSchema]):
-        """
-        Inserta múltiples modelos en la base de datos.
-        """
-        if not models_data:
-            return
-
-        models_dict = [model.model_dump() for model in models_data]
-        stmt = insert(self.model).values(models_dict)
-        stmt = stmt.on_conflict_do_nothing(index_elements=["name"])
-        db.execute(stmt)
-        db.commit()
