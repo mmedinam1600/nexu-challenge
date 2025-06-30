@@ -1,11 +1,18 @@
+import json
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from sqlalchemy import text
 
-from .database import database
+from core.config import settings
+from core.constants import MIN_AVERAGE_PRICE
+from core.database import database
+from crud.brand import CRUDBrand
+from crud.model import CRUDModel
 from models.brand import VehicleBrandModel
 from models.model import VehicleModelModel
+from schemas.brand import VehicleBrandCreateSchema
+from schemas.model import VehicleModelCreateSchema
 
 
 def init_db() -> None:
@@ -41,40 +48,77 @@ def seed_db() -> None:
     Poblar las tablas con datos de prueba.
     """
     logger.info("Poblando las tablas con datos de prueba...")
-    try:
-        with database.engine.connect() as connection:
-            connection.execute(text("INSERT INTO vehicle.brands (name, average_price) VALUES ('Acura', 702109) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.brands (name, average_price) VALUES ('Audi', 630759) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.brands (name, average_price) VALUES ('Bentley', 3342575) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.brands (name, average_price) VALUES ('BMW', 858702) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.brands (name, average_price) VALUES ('Buick', 290371) ON CONFLICT (name) DO NOTHING"))
-            connection.commit()
-    except Exception as e:
-        logger.error(f"Error al poblar la tabla de marcas con datos de prueba: {e}")
-        raise
+    db = database.SessionLocal()
 
     try:
-        with database.engine.connect() as connection:
-            connection.execute(text("INSERT INTO vehicle.models (name, average_price) VALUES ('ILX', 303176) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.models (name, average_price) VALUES ('MDX', 448193) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.models (name, average_price) VALUES ('NSX', 3818225) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.models (name, average_price) VALUES ('RDX', 395753) ON CONFLICT (name) DO NOTHING"))
-            connection.execute(text("INSERT INTO vehicle.models (name, average_price) VALUES ('RL', 239050) ON CONFLICT (name) DO NOTHING"))
-            connection.commit()
-    except Exception as e:
-        logger.error(f"Error al poblar la tabla de modelos con datos de prueba: {e}")
-        raise
+        brand_crud = CRUDBrand(VehicleBrandModel)
+        model_crud = CRUDModel(VehicleModelModel)
+
+        if db.query(VehicleBrandModel).first() is not None:
+            logger.info("La base de datos ya ha sido poblada. Saltando el sembrado.")
+            return
+
+        models_file = settings.BASE_DIR / "seeds" / "models.json"
+        if not models_file.exists():
+            logger.warning(f"El archivo de semillas no se encontró en {models_file}")
+            return
+
+        with open(models_file, "r") as f:
+            models_data = json.load(f)
+
+        new_brands = set()
+        new_models = []
+        for model_item in models_data:
+            brand_name = model_item["brand_name"]
+            average_price = (
+                None
+                if model_item["average_price"] == 0
+                else model_item["average_price"]
+            )
+            model_name = model_item["name"]
+
+            vehicle_brand_create_schema = VehicleBrandCreateSchema(
+                name=brand_name,
+            )
+
+            if vehicle_brand_create_schema not in new_brands:
+                brand = brand_crud.create(db, brand=vehicle_brand_create_schema)
+                new_brands.add(vehicle_brand_create_schema)
+            else:
+                brand = brand_crud.get_by_name(db, name=brand_name)
+                if not brand:
+                    logger.warning(
+                        f"La marca '{brand_name}' no se encuentra en la base de datos, no se puede agregar el modelo."
+                    )
+                    continue
+
+            if average_price is not None and average_price < MIN_AVERAGE_PRICE:
+                logger.info(
+                    f"El modelo {model_name} tiene un precio promedio de {average_price}, debido al caso de uso de el average > {MIN_AVERAGE_PRICE}, este se ignora."
+                )
+                continue
+            new_models.append(
+                VehicleModelCreateSchema(
+                    brand_id=brand.id, name=model_name, average_price=average_price
+                )
+            )
+
+        model_crud.bulk_insert(db, models_data=new_models)
+
+        logger.info(f"Se insertaron {len(new_brands)} marcas.")
+        logger.info(f"Se insertaron {len(new_models)} modelos.")
+        logger.info("¡Población de la base de datos completada!")
+    finally:
+        db.close()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # type: ignore
+async def lifespan(app: FastAPI):
     """
-    Gestor de contexto para el ciclo de vida de la aplicación de FastAPI.
+    Context manager para la aplicación FastAPI.
     """
-    logger.info("Ejecutando eventos de arranque (startup)...")
+    logger.info("Iniciando la aplicación...")
     init_db()
     seed_db()
-
     yield
-
-    logger.info("Ejecutando eventos de apagado (shutdown)...")
+    logger.info("Deteniendo la aplicación...")

@@ -1,35 +1,29 @@
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
-from decimal import Decimal
-from typing import Optional
-from uuid import UUID
+
+from core.constants import MIN_AVERAGE_PRICE
 
 
 class VehicleModelBaseSchema(BaseModel):
-    name: str
-    average_price: Optional[Decimal] = Field(
-        default=None,
-        gt=100000,
-        description="El precio promedio del modelo, debe ser mayor a 100,000",
+    name: str = Field(..., min_length=1, max_length=100)
+    average_price: float | None = Field(
+        None,
+        gt=MIN_AVERAGE_PRICE,
+        description="El precio debe ser mayor que {MIN_AVERAGE_PRICE}.",
     )
 
 
 class VehicleModelCreateSchema(VehicleModelBaseSchema):
-    pass
+    brand_id: int
 
 
 class VehicleModelUpdateSchema(BaseModel):
-    name: Optional[str] = None
-    average_price: Optional[Decimal] = Field(
-        default=None,
-        gt=100000,
-        description="El precio promedio del modelo, debe ser mayor a 100,000",
-    )
-    is_active: Optional[bool] = None
+    name: str | None = Field(None, min_length=1, max_length=100)
 
 
 class VehicleModelSchema(VehicleModelBaseSchema):
-    id: UUID
+    id: int
+    brand_id: int
     is_active: bool
     created_at: datetime
     updated_at: datetime

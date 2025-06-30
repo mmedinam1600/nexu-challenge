@@ -1,35 +1,29 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from decimal import Decimal
 from typing import Optional
-from uuid import UUID
 
 
 class VehicleBrandBaseSchema(BaseModel):
     name: str
-    average_price: Optional[Decimal] = Field(
-        default=None,
-        gt=100000,
-        description="El precio promedio de la marca, debe ser mayor a 100,000",
-    )
 
 
 class VehicleBrandCreateSchema(VehicleBrandBaseSchema):
-    pass
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, VehicleBrandBaseSchema):
+            return NotImplemented
+        return self.name == other.name
+
+    def __hash__(self) -> int:
+        return hash(self.name)
 
 
 class VehicleBrandUpdateSchema(BaseModel):
     name: Optional[str] = None
-    average_price: Optional[Decimal] = Field(
-        default=None,
-        gt=100000,
-        description="El precio promedio de la marca, debe ser mayor a 100,000",
-    )
     is_active: Optional[bool] = None
 
 
 class VehicleBrandSchema(VehicleBrandBaseSchema):
-    id: UUID
+    id: int
     is_active: bool
     created_at: datetime
     updated_at: datetime

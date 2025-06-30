@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import PostgresDsn, BaseModel
 
@@ -6,6 +7,7 @@ load_dotenv()
 
 
 class Settings(BaseModel):
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent
     ENVIRONMENT: str = os.getenv(
         "ENVIRONMENT", "local"
     )  # LOCAL, DEVELOPMENT, STAGING, PRODUCTION
