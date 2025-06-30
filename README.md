@@ -10,6 +10,7 @@ Prueba backend para el despliegue de un microservicio de FastAPI para la creacio
 - Orquestación de contenedores con **Docker Compose**.
 - Comandos simplificados para la gestión del entorno con **Makefile**.
 - Configuración centralizada y flexible basada en variables de entorno.
+- **Pruebas unitarias** con **Pytest** y mocks para conexiones externas.
 
 ---
 
@@ -72,3 +73,23 @@ Si has hecho cambios en el `Dockerfile` o en las dependencias de la aplicación:
 ```bash
 make build
 ```
+
+---
+
+## Pruebas Unitarias
+
+### Ejecutar las Pruebas
+
+Para ejecutar todas las pruebas unitarias:
+```bash
+pytest src/test/
+```
+
+### Ejecutar Pruebas Específicas
+
+Para ejecutar pruebas de un archivo específico:
+```bash
+pytest src/test/test_model_service.py
+```
+
+---
