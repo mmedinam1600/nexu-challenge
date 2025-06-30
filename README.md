@@ -2,6 +2,13 @@
 
 Prueba backend para el despliegue de un microservicio de FastAPI para la creacion de una API basica para hacer un CRUD de modelos y marcas de vehiculos utilizando las tecnologias de Python, PostgreSQL, Docker y Docker Compose.
 
+
+## Live Testing
+
+La API se puede testear en vivo con la siguiente URL
+
+`http://154.38.174.26:8000/docs`
+
 ## Características
 
 - Aplicación Backend con **FastAPI**.
