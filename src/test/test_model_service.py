@@ -7,7 +7,6 @@ from schemas.model import VehicleModelUpdateSchema
 
 
 class TestModelService:
-
     def test_get_all_models_filtered_success(self, mock_db_session, sample_models_list):
         """Prueba obtener todos los modelos con filtros exitosamente."""
         # Arrange
@@ -32,7 +31,9 @@ class TestModelService:
         mock_db_session.query.return_value.filter.return_value = mock_filter
 
         # Act
-        result = ModelService.get_all_models_filtered(mock_db_session, greater=greater_price)
+        result = ModelService.get_all_models_filtered(
+            mock_db_session, greater=greater_price
+        )
 
         # Assert
         assert result == mock_models
@@ -48,7 +49,9 @@ class TestModelService:
         mock_db_session.query.return_value.filter.return_value = mock_filter
 
         # Act
-        result = ModelService.get_all_models_filtered(mock_db_session, lower=lower_price)
+        result = ModelService.get_all_models_filtered(
+            mock_db_session, lower=lower_price
+        )
 
         # Assert
         assert result == mock_models
@@ -83,12 +86,14 @@ class TestModelService:
         update_data = {"average_price": 300000.50}
         model_schema = VehicleModelUpdateSchema(**update_data)
         mock_model = Mock(id=model_id, name="Corolla", average_price=300000.50)
-        
-        with patch('services.model_service.CRUDModel.get_by_id', return_value=mock_model), \
-             patch('services.model_service.CRUDModel.update', return_value=mock_model):
-            
+
+        with patch(
+            "services.model_service.CRUDModel.get_by_id", return_value=mock_model
+        ), patch("services.model_service.CRUDModel.update", return_value=mock_model):
             # Act
-            result = ModelService.update_model_price(mock_db_session, model_id, model_schema)
+            result = ModelService.update_model_price(
+                mock_db_session, model_id, model_schema
+            )
 
             # Assert
             assert result == mock_model
@@ -99,14 +104,16 @@ class TestModelService:
         model_id = 999
         update_data = {"average_price": 300000.50}
         model_schema = VehicleModelUpdateSchema(**update_data)
-        
-        with patch('services.model_service.CRUDModel.get_by_id', return_value=None):
+
+        with patch("services.model_service.CRUDModel.get_by_id", return_value=None):
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
                 ModelService.update_model_price(mock_db_session, model_id, model_schema)
-            
+
             assert exc_info.value.status_code == 404
-            assert f"El modelo con id '{model_id}' no existe." in str(exc_info.value.detail)
+            assert f"El modelo con id '{model_id}' no existe." in str(
+                exc_info.value.detail
+            )
 
     def test_update_model_price_partial_update(self, mock_db_session):
         """Prueba actualización parcial del modelo."""
@@ -115,12 +122,14 @@ class TestModelService:
         update_data = {"average_price": 300000.50}
         model_schema = VehicleModelUpdateSchema(**update_data)
         mock_model = Mock(id=model_id, name="Corolla", average_price=300000.50)
-        
-        with patch('services.model_service.CRUDModel.get_by_id', return_value=mock_model), \
-             patch('services.model_service.CRUDModel.update', return_value=mock_model):
-            
+
+        with patch(
+            "services.model_service.CRUDModel.get_by_id", return_value=mock_model
+        ), patch("services.model_service.CRUDModel.update", return_value=mock_model):
             # Act
-            result = ModelService.update_model_price(mock_db_session, model_id, model_schema)
+            result = ModelService.update_model_price(
+                mock_db_session, model_id, model_schema
+            )
 
             # Assert
             assert result == mock_model
@@ -132,12 +141,14 @@ class TestModelService:
         update_data = {}
         model_schema = VehicleModelUpdateSchema(**update_data)
         mock_model = Mock(id=model_id, name="Corolla", average_price=250000.50)
-        
-        with patch('services.model_service.CRUDModel.get_by_id', return_value=mock_model), \
-             patch('services.model_service.CRUDModel.update', return_value=mock_model):
-            
+
+        with patch(
+            "services.model_service.CRUDModel.get_by_id", return_value=mock_model
+        ), patch("services.model_service.CRUDModel.update", return_value=mock_model):
             # Act
-            result = ModelService.update_model_price(mock_db_session, model_id, model_schema)
+            result = ModelService.update_model_price(
+                mock_db_session, model_id, model_schema
+            )
 
             # Assert
-            assert result == mock_model 
+            assert result == mock_model

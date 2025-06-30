@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 from decimal import Decimal
@@ -26,9 +26,10 @@ def mock_db_session():
 @pytest.fixture
 def client(mock_db_session):
     """Cliente de prueba con base de datos mockeada."""
+
     def override_get_db():
         yield mock_db_session
-    
+
     app.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
     yield test_client
@@ -43,7 +44,7 @@ def sample_brand_data():
         "name": "Toyota",
         "is_active": True,
         "created_at": "2024-01-01T00:00:00",
-        "updated_at": "2024-01-01T00:00:00"
+        "updated_at": "2024-01-01T00:00:00",
     }
 
 
@@ -57,7 +58,7 @@ def sample_model_data():
         "brand_id": 1,
         "is_active": True,
         "created_at": "2024-01-01T00:00:00",
-        "updated_at": "2024-01-01T00:00:00"
+        "updated_at": "2024-01-01T00:00:00",
     }
 
 
@@ -70,15 +71,15 @@ def sample_brands_list():
             "name": "Toyota",
             "is_active": True,
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
+            "updated_at": "2024-01-01T00:00:00",
         },
         {
             "id": 2,
             "name": "Honda",
             "is_active": True,
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
-        }
+            "updated_at": "2024-01-01T00:00:00",
+        },
     ]
 
 
@@ -93,7 +94,7 @@ def sample_models_list():
             "brand_id": 1,
             "is_active": True,
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
+            "updated_at": "2024-01-01T00:00:00",
         },
         {
             "id": 2,
@@ -102,6 +103,6 @@ def sample_models_list():
             "brand_id": 1,
             "is_active": True,
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
-        }
-    ] 
+            "updated_at": "2024-01-01T00:00:00",
+        },
+    ]
